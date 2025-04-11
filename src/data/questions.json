@@ -1,0 +1,694 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "text": "What is the capital of France?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Paris"
+        },
+        {
+          "id": "alt_1",
+          "text": "Berlin"
+        },
+        {
+          "id": "alt_2",
+          "text": "Rome"
+        },
+        {
+          "id": "alt_3",
+          "text": "Madrid"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q2",
+      "text": "Who wrote 'Romeo and Juliet'?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "William Shakespeare"
+        },
+        {
+          "id": "alt_1",
+          "text": "Leo Tolstoy"
+        },
+        {
+          "id": "alt_2",
+          "text": "Mark Twain"
+        },
+        {
+          "id": "alt_3",
+          "text": "Charles Dickens"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q3",
+      "text": "What is the largest planet in our solar system?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Mars"
+        },
+        {
+          "id": "alt_1",
+          "text": "Earth"
+        },
+        {
+          "id": "alt_2",
+          "text": "Jupiter"
+        },
+        {
+          "id": "alt_3",
+          "text": "Venus"
+        }
+      ],
+      "correctAnswerId": "alt_2"
+    },
+    {
+      "id": "q4",
+      "text": "Which element has the chemical symbol 'O'?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Oxygen"
+        },
+        {
+          "id": "alt_1",
+          "text": "Gold"
+        },
+        {
+          "id": "alt_2",
+          "text": "Silver"
+        },
+        {
+          "id": "alt_3",
+          "text": "Hydrogen"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q5",
+      "text": "In what year did the Titanic sink?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "1912"
+        },
+        {
+          "id": "alt_1",
+          "text": "1923"
+        },
+        {
+          "id": "alt_2",
+          "text": "1905"
+        },
+        {
+          "id": "alt_3",
+          "text": "1898"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q6",
+      "text": "Which country hosted the 2016 Summer Olympics?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Brazil"
+        },
+        {
+          "id": "alt_1",
+          "text": "China"
+        },
+        {
+          "id": "alt_2",
+          "text": "UK"
+        },
+        {
+          "id": "alt_3",
+          "text": "Russia"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q7",
+      "text": "What is the hardest natural substance on Earth?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Diamond"
+        },
+        {
+          "id": "alt_1",
+          "text": "Gold"
+        },
+        {
+          "id": "alt_2",
+          "text": "Iron"
+        },
+        {
+          "id": "alt_3",
+          "text": "Granite"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q8",
+      "text": "Who painted the Mona Lisa?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Leonardo da Vinci"
+        },
+        {
+          "id": "alt_1",
+          "text": "Pablo Picasso"
+        },
+        {
+          "id": "alt_2",
+          "text": "Vincent van Gogh"
+        },
+        {
+          "id": "alt_3",
+          "text": "Claude Monet"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q9",
+      "text": "What is the smallest prime number?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "2"
+        },
+        {
+          "id": "alt_1",
+          "text": "1"
+        },
+        {
+          "id": "alt_2",
+          "text": "3"
+        },
+        {
+          "id": "alt_3",
+          "text": "5"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q10",
+      "text": "What is the capital city of Australia?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Canberra"
+        },
+        {
+          "id": "alt_1",
+          "text": "Sydney"
+        },
+        {
+          "id": "alt_2",
+          "text": "Melbourne"
+        },
+        {
+          "id": "alt_3",
+          "text": "Perth"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q11",
+      "text": "What is the boiling point of water in Celsius?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "100\u00b0C"
+        },
+        {
+          "id": "alt_1",
+          "text": "90\u00b0C"
+        },
+        {
+          "id": "alt_2",
+          "text": "80\u00b0C"
+        },
+        {
+          "id": "alt_3",
+          "text": "120\u00b0C"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q12",
+      "text": "Which planet is known as the Red Planet?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Mars"
+        },
+        {
+          "id": "alt_1",
+          "text": "Venus"
+        },
+        {
+          "id": "alt_2",
+          "text": "Mercury"
+        },
+        {
+          "id": "alt_3",
+          "text": "Jupiter"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q13",
+      "text": "Who invented the telephone?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Alexander Graham Bell"
+        },
+        {
+          "id": "alt_1",
+          "text": "Thomas Edison"
+        },
+        {
+          "id": "alt_2",
+          "text": "Nikola Tesla"
+        },
+        {
+          "id": "alt_3",
+          "text": "Guglielmo Marconi"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q14",
+      "text": "What is the chemical formula for water?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "H2O"
+        },
+        {
+          "id": "alt_1",
+          "text": "CO2"
+        },
+        {
+          "id": "alt_2",
+          "text": "O2"
+        },
+        {
+          "id": "alt_3",
+          "text": "NaCl"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q15",
+      "text": "What is the largest mammal?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Blue Whale"
+        },
+        {
+          "id": "alt_1",
+          "text": "Elephant"
+        },
+        {
+          "id": "alt_2",
+          "text": "Giraffe"
+        },
+        {
+          "id": "alt_3",
+          "text": "Hippopotamus"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q16",
+      "text": "What is the main gas found in the air we breathe?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Nitrogen"
+        },
+        {
+          "id": "alt_1",
+          "text": "Oxygen"
+        },
+        {
+          "id": "alt_2",
+          "text": "Carbon Dioxide"
+        },
+        {
+          "id": "alt_3",
+          "text": "Hydrogen"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q17",
+      "text": "Which country gifted the Statue of Liberty to the USA?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "France"
+        },
+        {
+          "id": "alt_1",
+          "text": "UK"
+        },
+        {
+          "id": "alt_2",
+          "text": "Germany"
+        },
+        {
+          "id": "alt_3",
+          "text": "Spain"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q18",
+      "text": "How many continents are there?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "7"
+        },
+        {
+          "id": "alt_1",
+          "text": "5"
+        },
+        {
+          "id": "alt_2",
+          "text": "6"
+        },
+        {
+          "id": "alt_3",
+          "text": "8"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q19",
+      "text": "What is the currency of Japan?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Yen"
+        },
+        {
+          "id": "alt_1",
+          "text": "Won"
+        },
+        {
+          "id": "alt_2",
+          "text": "Dollar"
+        },
+        {
+          "id": "alt_3",
+          "text": "Euro"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q20",
+      "text": "Who is the author of 'Harry Potter'?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "J.K. Rowling"
+        },
+        {
+          "id": "alt_1",
+          "text": "J.R.R. Tolkien"
+        },
+        {
+          "id": "alt_2",
+          "text": "Stephen King"
+        },
+        {
+          "id": "alt_3",
+          "text": "George R.R. Martin"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q21",
+      "text": "What is the chemical symbol for gold?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Au"
+        },
+        {
+          "id": "alt_1",
+          "text": "Ag"
+        },
+        {
+          "id": "alt_2",
+          "text": "Pb"
+        },
+        {
+          "id": "alt_3",
+          "text": "Fe"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q22",
+      "text": "Who discovered penicillin?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Alexander Fleming"
+        },
+        {
+          "id": "alt_1",
+          "text": "Marie Curie"
+        },
+        {
+          "id": "alt_2",
+          "text": "Louis Pasteur"
+        },
+        {
+          "id": "alt_3",
+          "text": "Isaac Newton"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q23",
+      "text": "Which city is known as the City of Love?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Paris"
+        },
+        {
+          "id": "alt_1",
+          "text": "Rome"
+        },
+        {
+          "id": "alt_2",
+          "text": "Venice"
+        },
+        {
+          "id": "alt_3",
+          "text": "New York"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q24",
+      "text": "What is the capital of Italy?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Rome"
+        },
+        {
+          "id": "alt_1",
+          "text": "Venice"
+        },
+        {
+          "id": "alt_2",
+          "text": "Milan"
+        },
+        {
+          "id": "alt_3",
+          "text": "Naples"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q25",
+      "text": "How many sides does a hexagon have?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "6"
+        },
+        {
+          "id": "alt_1",
+          "text": "5"
+        },
+        {
+          "id": "alt_2",
+          "text": "7"
+        },
+        {
+          "id": "alt_3",
+          "text": "8"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q26",
+      "text": "What is the capital of Germany?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Berlin"
+        },
+        {
+          "id": "alt_1",
+          "text": "Munich"
+        },
+        {
+          "id": "alt_2",
+          "text": "Frankfurt"
+        },
+        {
+          "id": "alt_3",
+          "text": "Hamburg"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q27",
+      "text": "What is the main ingredient in sushi?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Rice"
+        },
+        {
+          "id": "alt_1",
+          "text": "Bread"
+        },
+        {
+          "id": "alt_2",
+          "text": "Noodles"
+        },
+        {
+          "id": "alt_3",
+          "text": "Potato"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q28",
+      "text": "Which is the smallest planet in our solar system?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Mercury"
+        },
+        {
+          "id": "alt_1",
+          "text": "Venus"
+        },
+        {
+          "id": "alt_2",
+          "text": "Mars"
+        },
+        {
+          "id": "alt_3",
+          "text": "Earth"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q29",
+      "text": "What is the capital of Canada?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Ottawa"
+        },
+        {
+          "id": "alt_1",
+          "text": "Toronto"
+        },
+        {
+          "id": "alt_2",
+          "text": "Vancouver"
+        },
+        {
+          "id": "alt_3",
+          "text": "Montreal"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    },
+    {
+      "id": "q30",
+      "text": "Who painted the ceiling of the Sistine Chapel?",
+      "alternatives": [
+        {
+          "id": "alt_0",
+          "text": "Michelangelo"
+        },
+        {
+          "id": "alt_1",
+          "text": "Leonardo da Vinci"
+        },
+        {
+          "id": "alt_2",
+          "text": "Raphael"
+        },
+        {
+          "id": "alt_3",
+          "text": "Donatello"
+        }
+      ],
+      "correctAnswerId": "alt_0"
+    }
+  ]
+}

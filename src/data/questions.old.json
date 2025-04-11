@@ -1,0 +1,115 @@
+{
+    "questions": [
+      {
+        "id": "q1",
+        "text": "What is the capital of France?",
+        "alternatives": [
+          { "id": "alt_0", "text": "Paris" },
+          { "id": "alt_1", "text": "Berlin" },
+          { "id": "alt_2", "text": "Rome" },
+          { "id": "alt_3", "text": "Madrid" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q2",
+        "text": "Who wrote 'Romeo and Juliet'?",
+        "alternatives": [
+          { "id": "alt_0", "text": "William Shakespeare" },
+          { "id": "alt_1", "text": "Leo Tolstoy" },
+          { "id": "alt_2", "text": "Mark Twain" },
+          { "id": "alt_3", "text": "Charles Dickens" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q3",
+        "text": "What is the largest planet in our solar system?",
+        "alternatives": [
+          { "id": "alt_0", "text": "Mars" },
+          { "id": "alt_1", "text": "Earth" },
+          { "id": "alt_2", "text": "Jupiter" },
+          { "id": "alt_3", "text": "Venus" }
+        ],
+        "correctAnswerId": "alt_2"
+      },
+      {
+        "id": "q4",
+        "text": "Which element has the chemical symbol 'O'?",
+        "alternatives": [
+          { "id": "alt_0", "text": "Oxygen" },
+          { "id": "alt_1", "text": "Gold" },
+          { "id": "alt_2", "text": "Silver" },
+          { "id": "alt_3", "text": "Hydrogen" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q5",
+        "text": "In what year did the Titanic sink?",
+        "alternatives": [
+          { "id": "alt_0", "text": "1912" },
+          { "id": "alt_1", "text": "1923" },
+          { "id": "alt_2", "text": "1905" },
+          { "id": "alt_3", "text": "1898" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q6",
+        "text": "Which country hosted the 2016 Summer Olympics?",
+        "alternatives": [
+          { "id": "alt_0", "text": "Brazil" },
+          { "id": "alt_1", "text": "China" },
+          { "id": "alt_2", "text": "UK" },
+          { "id": "alt_3", "text": "Russia" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q7",
+        "text": "What is the hardest natural substance on Earth?",
+        "alternatives": [
+          { "id": "alt_0", "text": "Diamond" },
+          { "id": "alt_1", "text": "Gold" },
+          { "id": "alt_2", "text": "Iron" },
+          { "id": "alt_3", "text": "Granite" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q8",
+        "text": "Who painted the Mona Lisa?",
+        "alternatives": [
+          { "id": "alt_0", "text": "Leonardo da Vinci" },
+          { "id": "alt_1", "text": "Pablo Picasso" },
+          { "id": "alt_2", "text": "Vincent van Gogh" },
+          { "id": "alt_3", "text": "Claude Monet" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q9",
+        "text": "What is the smallest prime number?",
+        "alternatives": [
+          { "id": "alt_0", "text": "2" },
+          { "id": "alt_1", "text": "1" },
+          { "id": "alt_2", "text": "3" },
+          { "id": "alt_3", "text": "5" }
+        ],
+        "correctAnswerId": "alt_0"
+      },
+      {
+        "id": "q10",
+        "text": "What is the capital city of Australia?",
+        "alternatives": [
+          { "id": "alt_0", "text": "Canberra" },
+          { "id": "alt_1", "text": "Sydney" },
+          { "id": "alt_2", "text": "Melbourne" },
+          { "id": "alt_3", "text": "Perth" }
+        ],
+        "correctAnswerId": "alt_0"
+      }
+    ]
+  }
+  
