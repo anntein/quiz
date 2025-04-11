@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isValidQuizData() {
+      return request.resource.data.keys().hasAll(['questions', 'createdAt', 'isActive', 'participants'])
+        && request.resource.data.questions is list
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.isActive is bool
+        && request.resource.data.participants is map;
+    }
+    
+    function isValidParticipantData() {
+      return request.resource.data.participants[request.auth.uid].keys().hasAll(['score', 'joinedAt'])
+        && request.resource.data.participants[request.auth.uid].score is number
+        && request.resource.data.participants[request.auth.uid].joinedAt is timestamp;
+    }
+
+    // Quiz collection rules
+    match /quizzes/{quizId} {
+      // Allow reading if the quiz exists and is active
+      allow read: if resource != null && resource.data.isActive == true;
+      
+      // Allow creating new quizzes
+      allow create: if isAuthenticated() 
+        && isValidQuizData();
+      
+      // Allow updating quiz data (for submitting scores)
+      allow update: if isAuthenticated()
+        && resource != null
+        && resource.data.isActive == true
+        && isValidParticipantData();
+      
+      // Allow deleting only if the user is the creator
+      allow delete: if isAuthenticated() 
+        && resource != null 
+        && resource.data.createdBy == request.auth.uid;
+    }
+  }
+} 

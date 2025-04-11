@@ -1,5 +1,5 @@
 {
-  "name": "quiz-test-experimental",
+  "name": "quiz",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,6 +11,7 @@
     "deploy": "gh-pages -d out"
   },
   "dependencies": {
+    "firebase": "^11.6.0",
     "next": "14.1.4",
     "react": "^18",
     "react-dom": "^18",

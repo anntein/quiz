@@ -1,12 +1,13 @@
-# Quiz Test - Experimental Version
+# Quiz App
 
-This is the experimental version of the Quiz Test application, featuring new and experimental functionality.
+A modern quiz application built with Next.js and TypeScript.
 
 ## Features
 
-- Experimental UI components
-- New quiz mechanics
-- Testing ground for new features
+- Interactive quiz interface
+- Real-time feedback
+- Responsive design
+- Modern UI with Tailwind CSS
 
 ## Development
 
@@ -23,7 +24,7 @@ npm run build
 
 ## Deployment
 
-This version is deployed to GitHub Pages at: https://anntein.github.io/quiz-test-experimental/
+This version is deployed to GitHub Pages at: https://anntein.github.io/quiz/
 
 ## Experimental Features
 
@@ -33,7 +34,7 @@ This version is deployed to GitHub Pages at: https://anntein.github.io/quiz-test
 
 ## Contributing
 
-This is an experimental branch. Please report any issues or suggestions.
+Feel free to submit issues and enhancement requests.
 
 ## Getting Started
 

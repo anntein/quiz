@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  basePath: process.env.NODE_ENV === 'production' ? '/quiz-test' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '/quiz' : '',
   images: {
     unoptimized: true,
   },
@@ -9,6 +9,13 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['*']
     }
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, 'src'),
+    };
+    return config;
   }
 }
 

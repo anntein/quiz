@@ -1,62 +1,241 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HomeView from '@/components/HomeView';
+import JoinQuizView from '@/components/JoinQuizView';
+import NicknameEntry from '@/components/NicknameEntry';
 import QuestionView from '@/components/QuestionView';
 import ResultsView from '@/components/ResultsView';
-import { QuizState } from '@/lib/types';
 import { getQuestions } from '@/lib/questions';
+import { Question } from '@/lib/types';
+import { signIn, onAuthStateChange } from '@/lib/firebase/authService';
+import { createQuiz, joinQuiz, submitScore, getLeaderboard, getQuiz } from '@/lib/firebase/quizService';
+import { saveLastNickname, getLastNickname } from '@/utils/storage';
 
-type View = 'home' | 'question' | 'results';
+interface ExtendedQuizState {
+  quizId: string;
+  questions: Question[];
+  currentQuestionIndex: number;
+  score: number;
+  timeBasedScore: number;
+  questionStartTime: number;
+  timeLimit: number;
+  questionScores: {
+    accuracy: number;
+    timeBonus: number;
+  }[];
+  currentPlayer: {
+    userId: string;
+    nickname: string;
+    score: number;
+  };
+}
+
+const TIME_LIMIT = 30; // seconds per question
+const ACCURACY_POINTS = 100;
+const TIME_BONUS_RATE = 10;
+
+const calculateQuestionScore = (
+  isCorrect: boolean,
+  timeSpent: number
+): { accuracy: number; timeBonus: number } => {
+  const accuracyScore = isCorrect ? ACCURACY_POINTS : 0;
+  const timeRemaining = Math.max(0, TIME_LIMIT - timeSpent);
+  const timeBonus = Math.floor(timeRemaining * TIME_BONUS_RATE);
+  
+  return {
+    accuracy: accuracyScore,
+    timeBonus: timeBonus
+  };
+};
 
 export default function Home() {
-  const [view, setView] = useState<View>('home');
+  const [view, setView] = useState<'home' | 'join' | 'nickname' | 'question' | 'results'>('home');
   const [showEmoji, setShowEmoji] = useState(false);
-  const [quizState, setQuizState] = useState<QuizState>({
-    currentQuestionIndex: 0,
+  const [quizState, setQuizState] = useState<ExtendedQuizState>({
+    quizId: '',
     questions: [],
-    userAnswers: [],
+    currentQuestionIndex: 0,
     score: 0,
+    timeBasedScore: 0,
+    questionStartTime: 0,
+    timeLimit: TIME_LIMIT,
+    questionScores: [],
+    currentPlayer: {
+      userId: '',
+      nickname: '',
+      score: 0
+    }
   });
 
-  const startQuiz = async () => {
+  useEffect(() => {
+    // Initialize Firebase auth
+    const unsubscribe = onAuthStateChange(async (user) => {
+      if (!user) {
+        await signIn();
+      }
+    });
+
+    // Check for join parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinQuizId = urlParams.get('join');
+    if (joinQuizId) {
+      handleJoinQuiz(joinQuizId);
+    }
+
+    return () => unsubscribe();
+  }, []);
+
+  const startNewQuiz = async () => {
     try {
       const questions = await getQuestions();
+      const quizId = await createQuiz(questions);
+      
+      const lastNickname = getLastNickname();
+      if (lastNickname) {
+        // If we have a saved nickname, try to join directly
+        const success = await joinQuiz(quizId, lastNickname);
+        if (success) {
+          setQuizState({
+            ...quizState,
+            quizId,
+            questions,
+            currentQuestionIndex: 0,
+            score: 0,
+            timeBasedScore: 0,
+            questionStartTime: 0,
+            questionScores: [],
+            currentPlayer: {
+              ...quizState.currentPlayer,
+              nickname: lastNickname
+            }
+          });
+          setView('question');
+          return;
+        }
+      }
+
+      // If no saved nickname or join failed, show nickname entry
       setQuizState({
-        currentQuestionIndex: 0,
+        ...quizState,
+        quizId,
         questions,
-        userAnswers: [],
+        currentQuestionIndex: 0,
         score: 0,
+        timeBasedScore: 0,
+        questionStartTime: 0,
+        questionScores: []
       });
-      setView('question');
+      setView('nickname');
     } catch (error) {
-      console.error('Failed to start quiz:', error);
-      alert('Failed to load questions. Please try again.');
+      console.error('Failed to create quiz:', error);
+      alert('Failed to create quiz. Please try again.');
     }
   };
 
-  const handleAnswer = async (answerId: string) => {
-    const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
-    const isCorrect = answerId !== 'time_out' && currentQuestion.correctAnswerId === answerId;
-    
-    if (isCorrect) {
-      setShowEmoji(true);
-      // Wait for 1 second before updating state
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setShowEmoji(false);
+  const handleJoinQuiz = async (quizId: string) => {
+    try {
+      const quiz = await getQuiz(quizId);
+      if (!quiz) {
+        alert('Quiz not found');
+        return;
+      }
+
+      const lastNickname = getLastNickname();
+      if (lastNickname) {
+        // If we have a saved nickname, try to join directly
+        const success = await joinQuiz(quizId, lastNickname);
+        if (success) {
+          setQuizState({
+            ...quizState,
+            quizId,
+            questions: quiz.questions,
+            currentQuestionIndex: 0,
+            score: 0,
+            timeBasedScore: 0,
+            questionStartTime: 0,
+            questionScores: [],
+            currentPlayer: {
+              ...quizState.currentPlayer,
+              nickname: lastNickname
+            }
+          });
+          setView('question');
+          return;
+        }
+      }
+
+      // If no saved nickname or join failed, show nickname entry
+      setQuizState({
+        ...quizState,
+        quizId,
+        questions: quiz.questions,
+        currentQuestionIndex: 0,
+        score: 0,
+        timeBasedScore: 0,
+        questionStartTime: 0,
+        questionScores: []
+      });
+      setView('nickname');
+    } catch (error) {
+      console.error('Failed to join quiz:', error);
+      alert('Failed to join quiz. Please try again.');
     }
+  };
+
+  const handleNicknameSubmit = async (nickname: string) => {
+    try {
+      const success = await joinQuiz(quizState.quizId, nickname);
+      if (!success) {
+        alert('Failed to join quiz. The quiz might be full or no longer active.');
+        return;
+      }
+
+      // Save the nickname for future use
+      saveLastNickname(nickname);
+
+      setQuizState({
+        ...quizState,
+        currentPlayer: {
+          ...quizState.currentPlayer,
+          nickname
+        }
+      });
+      setView('question');
+    } catch (error) {
+      console.error('Failed to join quiz:', error);
+      alert('Failed to join quiz. Please try again.');
+    }
+  };
+
+  const handleAnswer = async (answerId: string, timeSpent: number) => {
+    const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
+    const isCorrect = answerId === currentQuestion.correctAnswerId;
+    
+    const questionScore = calculateQuestionScore(isCorrect, timeSpent);
+    const totalScore = questionScore.accuracy + questionScore.timeBonus;
+    
+    const nextQuestionIndex = quizState.currentQuestionIndex + 1;
+    const isLastQuestion = nextQuestionIndex >= quizState.questions.length;
     
     const newState = {
       ...quizState,
-      userAnswers: [...quizState.userAnswers, answerId],
-      score: isCorrect ? quizState.score + 1 : quizState.score,
-      currentQuestionIndex: quizState.currentQuestionIndex + 1,
+      score: quizState.score + (isCorrect ? 1 : 0),
+      timeBasedScore: quizState.timeBasedScore + totalScore,
+      questionScores: [...quizState.questionScores, questionScore],
+      currentQuestionIndex: nextQuestionIndex
     };
     
     setQuizState(newState);
 
-    if (newState.currentQuestionIndex >= quizState.questions.length) {
-      setView('results');
+    if (isLastQuestion) {
+      try {
+        await submitScore(quizState.quizId, newState.timeBasedScore);
+        setView('results');
+      } catch (error) {
+        console.error('Failed to submit score:', error);
+        alert('Failed to submit score. Please try again.');
+      }
     }
   };
 
@@ -64,38 +243,62 @@ export default function Home() {
     setView('home');
     setShowEmoji(false);
     setQuizState({
-      currentQuestionIndex: 0,
+      quizId: '',
       questions: [],
-      userAnswers: [],
+      currentQuestionIndex: 0,
       score: 0,
+      timeBasedScore: 0,
+      questionStartTime: 0,
+      timeLimit: TIME_LIMIT,
+      questionScores: [],
+      currentPlayer: {
+        userId: '',
+        nickname: '',
+        score: 0
+      }
     });
   };
 
-  if (view === 'home') {
-    return <HomeView onStartQuiz={startQuiz} />;
-  }
-
-  if (view === 'question' && quizState.questions.length > 0) {
-    return (
-      <QuestionView
-        question={quizState.questions[quizState.currentQuestionIndex]}
-        onAnswer={handleAnswer}
-        currentQuestionNumber={quizState.currentQuestionIndex + 1}
-        totalQuestions={quizState.questions.length}
-        showEmoji={showEmoji}
-      />
-    );
-  }
-
-  if (view === 'results') {
-    return (
-      <ResultsView
-        score={quizState.score}
-        totalQuestions={quizState.questions.length}
-        onReturnHome={returnHome}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <div className="min-h-screen bg-[#B5E0D6]">
+      {view === 'home' && (
+        <HomeView 
+          onNewQuiz={startNewQuiz}
+          onJoinQuiz={() => setView('join')}
+        />
+      )}
+      {view === 'join' && (
+        <JoinQuizView
+          onJoinQuiz={handleJoinQuiz}
+          onBack={() => setView('home')}
+        />
+      )}
+      {view === 'nickname' && (
+        <NicknameEntry
+          onSubmit={handleNicknameSubmit}
+          onBack={() => setView('home')}
+        />
+      )}
+      {view === 'question' && quizState.questions.length > 0 && quizState.currentQuestionIndex < quizState.questions.length && (
+        <QuestionView
+          question={quizState.questions[quizState.currentQuestionIndex]}
+          onAnswer={handleAnswer}
+          currentQuestionNumber={quizState.currentQuestionIndex + 1}
+          totalQuestions={quizState.questions.length}
+          showEmoji={showEmoji}
+          timeLimit={quizState.timeLimit}
+        />
+      )}
+      {view === 'results' && (
+        <ResultsView
+          quizId={quizState.quizId}
+          score={quizState.timeBasedScore}
+          totalQuestions={quizState.questions.length}
+          onReturnHome={returnHome}
+          questionScores={quizState.questionScores}
+          currentNickname={quizState.currentPlayer.nickname}
+        />
+      )}
+    </div>
+  );
 }
