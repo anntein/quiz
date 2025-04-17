@@ -23,8 +23,8 @@ service cloud.firestore {
 
     // Quiz collection rules
     match /quizzes/{quizId} {
-      // Allow reading if the quiz exists and is active
-      allow read: if resource != null && resource.data.isActive == true;
+      // Allow reading if authenticated
+      allow read: if isAuthenticated();
       
       // Allow creating new quizzes
       allow create: if isAuthenticated() 
@@ -33,8 +33,12 @@ service cloud.firestore {
       // Allow updating quiz data (for submitting scores)
       allow update: if isAuthenticated()
         && resource != null
-        && resource.data.isActive == true
-        && isValidParticipantData();
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['participants'])
+        && request.resource.data.participants[request.auth.uid].score is number
+        && request.resource.data.participants[request.auth.uid].joinedAt is timestamp
+        && (!('completedAt' in request.resource.data.participants[request.auth.uid]) 
+            || request.resource.data.participants[request.auth.uid].completedAt is timestamp);
       
       // Allow deleting only if the user is the creator
       allow delete: if isAuthenticated() 

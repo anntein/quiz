@@ -31,6 +31,18 @@ export interface Quiz {
   };
 }
 
+export interface RecentQuiz {
+  id: string;
+  name: string;  // Generated from quiz ID (e.g., "Happy Quiz 123")
+  createdAt: Timestamp;
+  totalParticipants: number;
+  userRank?: {
+    position: number;
+    score: number;
+    totalParticipants: number;
+  };
+}
+
 const generateQuizId = (): string => {
   const adjectives = ['happy', 'clever', 'quick', 'brave', 'wise', 'funny', 'smart', 'cool'];
   const nouns = ['quiz', 'game', 'test', 'challenge', 'match', 'battle', 'duel', 'race'];
@@ -110,7 +122,8 @@ export const joinQuiz = async (quizId: string, nickname: string): Promise<boolea
 
 export const submitScore = async (
   quizId: string, 
-  score: number
+  score: number,
+  nickname: string
 ): Promise<void> => {
   const user = auth.currentUser;
   if (!user) {
@@ -118,7 +131,26 @@ export const submitScore = async (
   }
 
   const quizRef = doc(db, 'quizzes', quizId);
+  const quizDoc = await getDoc(quizRef);
   
+  if (!quizDoc.exists()) {
+    throw new Error('Quiz not found');
+  }
+  
+  const quiz = quizDoc.data() as Quiz;
+  
+  // If user hasn't joined the quiz yet, join them first
+  if (!quiz.participants[user.uid]) {
+    await updateDoc(quizRef, {
+      [`participants.${user.uid}`]: {
+        nickname,
+        score: 0,
+        joinedAt: serverTimestamp()
+      }
+    });
+  }
+  
+  // Update the score and completion time
   await updateDoc(quizRef, {
     [`participants.${user.uid}.score`]: score,
     [`participants.${user.uid}.completedAt`]: serverTimestamp()
@@ -157,4 +189,53 @@ export const isQuizActive = async (quizId: string): Promise<boolean> => {
   
   const quiz = quizDoc.data() as Quiz;
   return quiz.isActive;
+};
+
+export const getRecentQuizzes = async (limitCount: number = 10): Promise<RecentQuiz[]> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('User must be authenticated');
+  }
+
+  const quizzesRef = collection(db, 'quizzes');
+  const q = query(
+    quizzesRef,
+    orderBy('createdAt', 'desc'),
+    limit(limitCount)
+  );
+
+  const snapshot = await getDocs(q);
+  const quizzes: RecentQuiz[] = [];
+
+  for (const doc of snapshot.docs) {
+    const data = doc.data() as Quiz;
+    const participants = Object.entries(data.participants || {});
+    const userParticipation = participants.find(([uid]) => uid === user.uid);
+    
+    // Sort participants by score to determine user's rank
+    const sortedParticipants = participants
+      .sort(([, a], [, b]) => b.score - a.score);
+    
+    const userRank = userParticipation ? {
+      position: sortedParticipants.findIndex(([uid]) => uid === user.uid) + 1,
+      score: userParticipation[1].score,
+      totalParticipants: participants.length
+    } : undefined;
+
+    // Convert quiz ID to readable name
+    const idParts = doc.id.split('-');
+    const name = idParts
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+
+    quizzes.push({
+      id: doc.id,
+      name,
+      createdAt: data.createdAt,
+      totalParticipants: participants.length,
+      userRank
+    });
+  }
+
+  return quizzes;
 }; 
