@@ -1,7 +1,8 @@
 'use client';
 
-import { FC, useState, useEffect } from 'react';
-import { getLeaderboard } from '@/lib/firebase/quizService';
+import { FC, useEffect } from 'react';
+import { Question } from '@/lib/types';
+import { submitScore } from '@/lib/firebase/quizService';
 
 interface ResultsViewProps {
   quizId: string;
@@ -13,6 +14,7 @@ interface ResultsViewProps {
     timeBonus: number;
   }[];
   currentNickname: string;
+  questions: { id: string }[];
 }
 
 const ResultsView: FC<ResultsViewProps> = ({
@@ -20,99 +22,106 @@ const ResultsView: FC<ResultsViewProps> = ({
   score,
   totalQuestions,
   onReturnHome,
-  questionScores,
-  currentNickname
+  questionScores = [],
+  currentNickname,
+  questions = [],
 }) => {
-  const [leaderboard, setLeaderboard] = useState<Array<{
-    nickname: string;
-    score: number;
-  }>>([]);
-
+  // Submit score and update question statistics
   useEffect(() => {
-    const loadLeaderboard = async () => {
+    const submitResults = async () => {
+      if (!quizId || !currentNickname || !questionScores.length || !questions.length) {
+        console.error('Missing required data for score submission');
+        return;
+      }
+
       try {
-        const scores = await getLeaderboard(quizId);
-        setLeaderboard(scores);
+        await submitScore(
+          quizId,
+          score,
+          currentNickname,
+          questionScores.map((q, index) => ({
+            questionId: questions[index].id,
+            isCorrect: q.accuracy > 0
+          }))
+        );
       } catch (error) {
-        console.error('Failed to load leaderboard:', error);
+        console.error('Failed to submit score:', error);
       }
     };
 
-    loadLeaderboard();
-  }, [quizId]);
+    submitResults();
+  }, [quizId, score, currentNickname, questionScores, questions]);
 
-  const correctAnswers = questionScores.filter(q => q.accuracy > 0).length;
-  const totalTimeBonus = questionScores.reduce((sum, q) => sum + q.timeBonus, 0);
-  
+  const handleShare = async () => {
+    if (!quizId) {
+      console.error('No quiz ID available for sharing');
+      return;
+    }
+
+    try {
+      const quizUrl = `${window.location.origin}/quiz/${quizId}`;
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Quiz Results',
+          text: `I scored ${score} points in this quiz! Can you beat my score?`,
+          url: quizUrl,
+        });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        await navigator.clipboard.writeText(quizUrl);
+        alert('Quiz URL copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Fallback for browsers that don't support Web Share API
+      const quizUrl = `${window.location.origin}/quiz/${quizId}`;
+      await navigator.clipboard.writeText(quizUrl);
+      alert('Quiz URL copied to clipboard!');
+    }
+  };
+
+  const correctAnswers = questionScores?.filter(q => q.accuracy > 0).length || 0;
+  const totalTimeBonus = questionScores?.reduce((sum, q) => sum + q.timeBonus, 0) || 0;
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-2xl text-center">
-        <h2 className="text-3xl font-bold mb-8 text-white">Quiz Complete!</h2>
+        <h2 className="text-3xl font-bold mb-6 text-[#1E293B]">Quiz Results</h2>
         
         <div className="bg-white/10 rounded-lg p-6 mb-8">
-          <div className="text-4xl font-bold mb-4 text-white">{score} points</div>
-          <div className="text-xl text-white mb-2">
-            {correctAnswers} out of {totalQuestions} correct
-          </div>
-          <div className="text-xl text-white mb-6">
-            {totalTimeBonus} points in time bonus
-          </div>
-
-          <div className="mt-8">
-            <h3 className="text-2xl font-bold mb-4 text-white">Leaderboard</h3>
-            <div className="space-y-2">
-              {leaderboard.map((player, index) => (
-                <div 
-                  key={player.nickname}
-                  className={`flex justify-between items-center p-3 rounded-lg ${
-                    player.nickname === currentNickname
-                      ? 'bg-blue-500/30 border-2 border-blue-400'
-                      : 'bg-white/5'
-                  }`}
-                >
-                  <span className="text-white">
-                    {index + 1}. {player.nickname}
-                  </span>
-                  <span className="text-white font-bold">
-                    {player.score} points
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <p className="text-2xl font-semibold text-[#1E293B] mb-2">
+            Your Score: {score} / {totalQuestions * 100}
+          </p>
+          <p className="text-[#475569]">
+            {score >= totalQuestions * 80
+              ? "🎉 Amazing job! You're a quiz master!"
+              : score >= totalQuestions * 60
+              ? "👍 Good effort! Keep practicing!"
+              : "💪 Don't worry, you'll do better next time!"}
+          </p>
         </div>
 
-        <button
-          onClick={onReturnHome}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition-colors"
-        >
-          Play Again
-        </button>
-
-        <div className="mt-8 p-4 bg-white/10 rounded-lg">
-          <h3 className="text-lg font-semibold text-white mb-2">Share this quiz with friends:</h3>
-          <div className="space-y-4">
-            <div>
-              <p className="text-white/60 text-sm mb-1">Quiz ID:</p>
-              <div className="text-2xl font-bold text-white bg-white/20 p-3 rounded-lg text-center">
-                {quizId}
-              </div>
-            </div>
-            <div>
-              <p className="text-white/60 text-sm mb-1">Or share this link:</p>
-              <div 
-                className="text-lg text-blue-400 bg-white/20 p-3 rounded-lg text-center cursor-pointer hover:bg-white/30 transition-colors"
-                onClick={() => {
-                  const url = `${window.location.origin}/?join=${quizId}`;
-                  navigator.clipboard.writeText(url);
-                }}
-              >
-                {window.location.origin}/?join={quizId}
-              </div>
-              <p className="text-white/60 text-xs mt-1 text-center">
-                Click to copy
-              </p>
-            </div>
+        <div className="space-y-4">
+          <button
+            onClick={handleShare}
+            className="w-full bg-[#0F3856] hover:bg-[#0a2a3f] text-[#F8FAFC] font-bold py-3 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg hover:shadow-[#0F3856]/25"
+          >
+            Add people to this quiz 🤺
+          </button>
+          
+          <div className="text-center">
+            <p className="text-[#64748B]">
+              Or give them this code: <span className="font-medium text-[#1E293B]">{quizId}</span>
+            </p>
+          </div>
+          
+          <div className="text-center">
+            <button
+              onClick={onReturnHome}
+              className="text-[#64748B] hover:text-[#475569] transition-colors"
+            >
+              Return to Home
+            </button>
           </div>
         </div>
       </div>

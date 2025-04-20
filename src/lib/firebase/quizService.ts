@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './config';
 import { Question } from '@/types/quiz';
+import { updateQuestionStats } from './questionService';
 
 export interface Quiz {
   id: string;
@@ -36,6 +37,7 @@ export interface RecentQuiz {
   name: string;  // Generated from quiz ID (e.g., "Happy Quiz 123")
   createdAt: Timestamp;
   totalParticipants: number;
+  participants: string[];  // Array of participant nicknames
   userRank?: {
     position: number;
     score: number;
@@ -123,7 +125,8 @@ export const joinQuiz = async (quizId: string, nickname: string): Promise<boolea
 export const submitScore = async (
   quizId: string, 
   score: number,
-  nickname: string
+  nickname: string,
+  questionScores: { questionId: string; isCorrect: boolean }[]
 ): Promise<void> => {
   const user = auth.currentUser;
   if (!user) {
@@ -155,6 +158,13 @@ export const submitScore = async (
     [`participants.${user.uid}.score`]: score,
     [`participants.${user.uid}.completedAt`]: serverTimestamp()
   });
+
+  // Update statistics for each question
+  await Promise.all(
+    questionScores.map(({ questionId, isCorrect }) =>
+      updateQuestionStats(questionId, isCorrect)
+    )
+  );
 };
 
 export const getLeaderboard = async (quizId: string): Promise<Array<{
@@ -233,6 +243,7 @@ export const getRecentQuizzes = async (limitCount: number = 10): Promise<RecentQ
       name,
       createdAt: data.createdAt,
       totalParticipants: participants.length,
+      participants: participants.map(([_, data]) => data.nickname),
       userRank
     });
   }

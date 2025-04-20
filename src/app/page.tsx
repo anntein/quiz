@@ -2,59 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import HomeView from '@/components/HomeView';
-import JoinQuizView from '@/components/JoinQuizView';
 import NicknameEntry from '@/components/NicknameEntry';
 import QuestionView from '@/components/QuestionView';
 import ResultsView from '@/components/ResultsView';
+import { Question, QuizState, QuizView } from '@/lib/types';
 import { getQuestions } from '@/lib/questions';
-import { Question } from '@/lib/types';
-import { signIn, onAuthStateChange } from '@/lib/firebase/authService';
-import { createQuiz, joinQuiz, submitScore, getLeaderboard, getQuiz } from '@/lib/firebase/quizService';
-import { auth } from '@/lib/firebase/config';
+import { calculateScore } from '@/utils/scores';
+import { createQuiz, submitScore } from '@/lib/firebase/quizService';
+import { onAuthStateChange } from '@/lib/firebase/authService';
 import { saveLastNickname, getLastNickname } from '@/utils/storage';
 import { TIME_LIMIT } from '@/lib/constants';
 import { TIME_BONUS_RATE } from '@/lib/constants';
-
-type ViewState = 'home' | 'join' | 'nickname' | 'question' | 'results';
-
-interface QuizState {
-  quizId: string;
-  questions: Question[];
-  currentQuestionIndex: number;
-  score: number;
-  timeBasedScore: number;
-  questionStartTime: number;
-  timeLimit: number;
-  questionScores: {
-    accuracy: number;
-    timeBonus: number;
-  }[];
-  currentPlayer: {
-    userId: string;
-    nickname: string;
-    score: number;
-  };
-}
-
-interface ExtendedQuizState {
-  quizId: string;
-  questions: Question[];
-  currentQuestionIndex: number;
-  score: number;
-  timeBasedScore: number;
-  questionStartTime: number;
-  timeLimit: number;
-  questionScores: {
-    accuracy: number;
-    timeBonus: number;
-  }[];
-  currentPlayer: {
-    userId: string;
-    nickname: string;
-    score: number;
-  };
-  timeRemaining: number;
-}
+import { getQuiz } from '@/lib/firebase/quizService';
 
 const ACCURACY_POINTS = 100;
 
@@ -72,281 +31,198 @@ const calculateQuestionScore = (
   };
 };
 
-export default function Home() {
-  const [viewState, setViewState] = useState<ViewState>('home');
-  const [quizState, setQuizState] = useState<ExtendedQuizState | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [showEmoji, setShowEmoji] = useState(false);
+const Page = () => {
+  const [quizState, setQuizState] = useState<QuizState>({
+    view: QuizView.HOME,
+    quizId: null,
+    questions: [],
+    currentQuestionIndex: 0,
+    score: 0,
+    timeBasedScore: 0,
+    currentPlayer: null,
+    participants: {},
+    isActive: true,
+    createdAt: new Date(),
+    totalParticipants: 0,
+    userRank: null
+  });
 
   useEffect(() => {
-    // Initialize Firebase auth
-    const unsubscribe = onAuthStateChange(async (user) => {
+    const unsubscribe = onAuthStateChange((user) => {
       if (!user) {
-        await signIn();
+        setQuizState(prev => ({ ...prev, view: QuizView.HOME }));
       }
     });
 
-    // Check for join parameter in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const joinQuizId = urlParams.get('join');
-    if (joinQuizId) {
-      handleJoinQuiz(joinQuizId);
-    }
-
     const lastNickname = getLastNickname();
-    if (lastNickname && quizState) {
-      setQuizState({
-        ...quizState,
+    if (lastNickname && quizState.currentPlayer) {
+      setQuizState(prev => ({
+        ...prev,
         currentPlayer: {
-          ...quizState.currentPlayer,
+          ...prev.currentPlayer!,
           nickname: lastNickname
-        },
-        timeRemaining: TIME_LIMIT
-      });
-      setViewState('question');
+        }
+      }));
     }
 
     return () => unsubscribe();
   }, []);
 
-  const startNewQuiz = async () => {
+  const handleNewQuiz = async () => {
     try {
-      const response = await fetch('/api/questions');
-      const questions = await response.json();
-      
-      // Create the quiz in Firestore
+      const questions = await getQuestions();
       const quizId = await createQuiz(questions);
       
-      setQuizState({
+      setQuizState(prev => ({
+        ...prev,
+        view: QuizView.NICKNAME_ENTRY,
         quizId,
         questions,
         currentQuestionIndex: 0,
         score: 0,
         timeBasedScore: 0,
-        questionStartTime: 0,
-        timeLimit: TIME_LIMIT,
-        questionScores: [],
-        currentPlayer: {
-          userId: auth.currentUser?.uid || '',
-          nickname: '',
-          score: 0
-        },
-        timeRemaining: TIME_LIMIT
-      });
-      setViewState('nickname');
+        currentPlayer: null,
+        participants: {},
+        isActive: true,
+        createdAt: new Date(),
+        totalParticipants: 0,
+        userRank: null
+      }));
     } catch (error) {
-      console.error('Failed to create quiz:', error);
-      setError('Failed to create quiz. Please try again.');
+      console.error('Failed to create new quiz:', error);
     }
   };
 
   const handleJoinQuiz = async (quizId: string) => {
     try {
       const quiz = await getQuiz(quizId);
-      
-      if (quiz) {
-        setQuizState({
-          quizId: quiz.id,
-          questions: quiz.questions,
-          currentQuestionIndex: 0,
-          score: 0,
-          timeBasedScore: 0,
-          questionStartTime: 0,
-          timeLimit: TIME_LIMIT,
-          questionScores: [],
-          currentPlayer: {
-            userId: auth.currentUser?.uid || '',
-            nickname: '',
-            score: 0
-          },
-          timeRemaining: TIME_LIMIT
-        });
-        setViewState('nickname');
-      } else {
-        setError('Quiz not found');
+      if (!quiz) {
+        console.error('Quiz not found');
+        return;
       }
+
+      setQuizState(prev => ({
+        ...prev,
+        view: QuizView.NICKNAME_ENTRY,
+        quizId,
+        questions: quiz.questions,
+        currentQuestionIndex: 0,
+        score: 0,
+        timeBasedScore: 0,
+        currentPlayer: null,
+        participants: {},
+        isActive: true,
+        createdAt: new Date(),
+        totalParticipants: 0,
+        userRank: null
+      }));
     } catch (error) {
       console.error('Failed to join quiz:', error);
-      setError('Failed to join quiz. Please try again.');
     }
   };
 
-  const handleNicknameSubmit = async (nickname: string) => {
-    if (!quizState) return;
-
-    try {
-      // Save the nickname for future use
-      saveLastNickname(nickname);
-      
-      // Join the quiz with the nickname
-      await joinQuiz(quizState.quizId, nickname);
-      
-      // Update the quiz state with the nickname
-      setQuizState({
-        ...quizState,
-        currentPlayer: {
-          ...quizState.currentPlayer,
-          nickname
-        },
-        timeRemaining: TIME_LIMIT
-      });
-      
-      setViewState('question');
-    } catch (error) {
-      console.error('Failed to join quiz:', error);
-      setError('Failed to join quiz. Please try again.');
-    }
+  const handleNicknameSubmit = (nickname: string) => {
+    saveLastNickname(nickname);
+    setQuizState(prev => ({
+      ...prev,
+      view: QuizView.QUESTION,
+      currentPlayer: { 
+        nickname, 
+        score: 0,
+        timeBasedScore: 0
+      }
+    }));
   };
 
-  const handleAnswerSubmit = async (answerId: string, timeSpent: number) => {
-    if (!quizState) return;
-
+  const handleAnswerSubmit = async (selectedAnswerId: string) => {
     const currentQuestion = quizState.questions[quizState.currentQuestionIndex];
-    const isCorrect = currentQuestion.correctAnswerId === answerId;
-    const nextQuestionIndex = quizState.currentQuestionIndex + 1;
-    
-    const questionScore = calculateQuestionScore(isCorrect, timeSpent);
-    const totalScore = questionScore.accuracy + questionScore.timeBonus;
-    
+    const isCorrect = selectedAnswerId === currentQuestion.correctAnswerId;
+    const timeRemaining = 30; // This should come from your timer component
+    const questionScore = calculateScore(isCorrect, timeRemaining);
+
     const newState = {
       ...quizState,
       score: quizState.score + (isCorrect ? 1 : 0),
-      timeBasedScore: quizState.timeBasedScore + totalScore,
-      questionScores: [...quizState.questionScores, questionScore],
-      currentQuestionIndex: nextQuestionIndex,
-      timeRemaining: quizState.timeRemaining - timeSpent
+      timeBasedScore: quizState.timeBasedScore + questionScore,
+      currentQuestionIndex: quizState.currentQuestionIndex + 1,
+      currentPlayer: {
+        ...quizState.currentPlayer!,
+        score: (quizState.currentPlayer?.score || 0) + (isCorrect ? 1 : 0),
+        timeBasedScore: (quizState.currentPlayer?.timeBasedScore || 0) + questionScore
+      }
     };
-    
-    setQuizState(newState);
-    
-    if (nextQuestionIndex >= quizState.questions.length) {
+
+    if (newState.currentQuestionIndex >= newState.questions.length) {
       try {
-        await submitScore(quizState.quizId, newState.timeBasedScore, newState.currentPlayer.nickname);
-        setViewState('results');
+        await submitScore(
+          newState.quizId!,
+          newState.timeBasedScore,
+          newState.currentPlayer!.nickname,
+          newState.questions.map((q, i) => ({
+            questionId: q.id,
+            isCorrect: i < newState.currentQuestionIndex ? 
+              newState.questions[i].correctAnswerId === selectedAnswerId : false
+          }))
+        );
+        setQuizState(prev => ({ ...prev, view: QuizView.RESULTS }));
       } catch (error) {
         console.error('Failed to submit score:', error);
-        setError('Failed to submit score. Please try again.');
       }
+    } else {
+      setQuizState(newState);
     }
   };
 
-  const returnHome = () => {
-    setViewState('home');
-    setShowEmoji(false);
-    setQuizState({
-      quizId: '',
+  const handleRestart = () => {
+    setQuizState(prev => ({
+      ...prev,
+      view: QuizView.HOME,
+      quizId: null,
       questions: [],
       currentQuestionIndex: 0,
       score: 0,
       timeBasedScore: 0,
-      questionStartTime: 0,
-      timeLimit: TIME_LIMIT,
-      questionScores: [],
-      currentPlayer: {
-        userId: '',
-        nickname: '',
-        score: 0
-      },
-      timeRemaining: TIME_LIMIT
-    });
-  };
-
-  const onJoinQuiz = async (quizId?: string) => {
-    if (quizId) {
-      try {
-        const quiz = await getQuiz(quizId);
-        if (quiz) {
-          setQuizState({
-            quizId: quiz.id,
-            questions: quiz.questions,
-            currentQuestionIndex: 0,
-            score: 0,
-            timeBasedScore: 0,
-            questionStartTime: 0,
-            timeLimit: TIME_LIMIT,
-            questionScores: [],
-            currentPlayer: {
-              userId: '',
-              nickname: '',
-              score: 0
-            },
-            timeRemaining: TIME_LIMIT
-          });
-          setViewState('question');
-        } else {
-          setError('Quiz not found');
-        }
-      } catch (error) {
-        setError('Failed to join quiz');
-      }
-    } else {
-      setViewState('join');
-    }
+      currentPlayer: null,
+      participants: {},
+      isActive: true,
+      createdAt: new Date(),
+      totalParticipants: 0,
+      userRank: null
+    }));
   };
 
   return (
     <div className="min-h-screen bg-[#B5E0D6]">
-      {viewState === 'home' && (
-        <HomeView 
-          onNewQuiz={startNewQuiz}
-          onJoinQuiz={() => setViewState('join')}
-        />
+      {quizState.view === QuizView.HOME && (
+        <HomeView onNewQuiz={handleNewQuiz} onJoinQuiz={handleJoinQuiz} />
       )}
-      {viewState === 'join' && (
-        <JoinQuizView
-          onJoinQuiz={handleJoinQuiz}
-          onBack={() => setViewState('home')}
-        />
+      {quizState.view === QuizView.NICKNAME_ENTRY && (
+        <NicknameEntry onSubmit={handleNicknameSubmit} />
       )}
-      {viewState === 'nickname' && (
-        <NicknameEntry
-          onSubmit={handleNicknameSubmit}
-          onBack={() => setViewState('home')}
-        />
-      )}
-      {viewState === 'question' && quizState && quizState.questions.length > 0 && quizState.currentQuestionIndex < quizState.questions.length && (
+      {quizState.view === QuizView.QUESTION && (
         <QuestionView
           question={quizState.questions[quizState.currentQuestionIndex]}
-          onAnswer={handleAnswerSubmit}
+          onAnswerSubmit={handleAnswerSubmit}
           currentQuestionNumber={quizState.currentQuestionIndex + 1}
           totalQuestions={quizState.questions.length}
-          showEmoji={false}
-          timeLimit={TIME_LIMIT}
         />
       )}
-      {viewState === 'results' && quizState && (
+      {quizState.view === QuizView.RESULTS && (
         <ResultsView
-          quizId={quizState.quizId}
+          quizId={quizState.quizId!}
           score={quizState.score}
           totalQuestions={quizState.questions.length}
-          onReturnHome={() => {
-            setViewState('home');
-            setQuizState({
-              quizId: '',
-              questions: [],
-              currentQuestionIndex: 0,
-              score: 0,
-              timeBasedScore: 0,
-              questionStartTime: 0,
-              timeLimit: TIME_LIMIT,
-              questionScores: [],
-              currentPlayer: {
-                userId: '',
-                nickname: '',
-                score: 0
-              },
-              timeRemaining: TIME_LIMIT
-            });
-          }}
-          questionScores={quizState.questionScores}
-          currentNickname={quizState.currentPlayer.nickname}
+          onReturnHome={handleRestart}
+          questionScores={quizState.questions.map((q, i) => ({
+            accuracy: q.correctAnswerId === quizState.questions[i].correctAnswerId ? 1 : 0,
+            timeBonus: 0 // You can calculate this based on your time tracking
+          }))}
+          currentNickname={quizState.currentPlayer?.nickname || ''}
+          questions={quizState.questions}
         />
-      )}
-      {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded">
-          {error}
-        </div>
       )}
     </div>
   );
-}
+};
+
+export default Page;

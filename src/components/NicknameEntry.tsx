@@ -5,10 +5,9 @@ import { getLastNickname, saveLastNickname } from '@/utils/storage';
 
 interface NicknameEntryProps {
   onSubmit: (nickname: string) => void;
-  onBack: () => void;
 }
 
-const NicknameEntry: FC<NicknameEntryProps> = ({ onSubmit, onBack }) => {
+const NicknameEntry: FC<NicknameEntryProps> = ({ onSubmit }) => {
   const [nickname, setNickname] = useState('');
   const [error, setError] = useState('');
 
@@ -35,46 +34,31 @@ const NicknameEntry: FC<NicknameEntryProps> = ({ onSubmit, onBack }) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-8 text-center text-white">Enter Nickname</h2>
+      <div className="w-full max-w-md text-center">
+        <h2 className="text-2xl font-bold mb-6 text-[#1E293B]">Enter Your Nickname</h2>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label 
-              htmlFor="nickname" 
-              className="block text-white text-lg font-medium mb-2"
-            >
-              Your Nickname
-            </label>
-            <input
-              id="nickname"
-              type="text"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20 focus:border-blue-500 focus:outline-none"
-              placeholder="Enter your nickname"
-            />
-            {error && (
-              <p className="mt-2 text-red-400 text-sm">{error}</p>
-            )}
-          </div>
+        <div className="space-y-4">
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="Choose a cool nickname"
+            className="w-full bg-white/10 text-[#1E293B] placeholder-[#64748B] border border-[#CBD5E1] rounded-lg px-4 py-3 focus:outline-none focus:border-[#0F3856]"
+            maxLength={20}
+          />
           
-          <div className="flex space-x-4">
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-            >
-              Back
-            </button>
-            <button
-              type="submit"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-            >
-              Continue
-            </button>
-          </div>
-        </form>
+          <button
+            onClick={handleSubmit}
+            disabled={!nickname.trim()}
+            className={`w-full py-3 px-8 rounded-lg text-lg font-bold transition-colors duration-200 ${
+              nickname.trim()
+                ? 'bg-[#0F3856] hover:bg-[#0a2a3f] text-[#F8FAFC] shadow-lg hover:shadow-[#0F3856]/25'
+                : 'bg-[#0F3856]/50 text-[#F8FAFC]/50 cursor-not-allowed'
+            }`}
+          >
+            Start Quiz
+          </button>
+        </div>
       </div>
     </div>
   );

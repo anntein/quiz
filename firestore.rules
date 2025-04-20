@@ -21,6 +21,13 @@ service cloud.firestore {
         && request.resource.data.participants[request.auth.uid].joinedAt is timestamp;
     }
 
+    function isValidQuestionStats() {
+      return request.resource.data.stats.keys().hasAll(['totalAttempts', 'correctAttempts', 'lastUpdated'])
+        && request.resource.data.stats.totalAttempts is number
+        && request.resource.data.stats.correctAttempts is number
+        && request.resource.data.stats.lastUpdated is timestamp;
+    }
+
     // Quiz collection rules
     match /quizzes/{quizId} {
       // Allow reading if authenticated
@@ -44,6 +51,17 @@ service cloud.firestore {
       allow delete: if isAuthenticated() 
         && resource != null 
         && resource.data.createdBy == request.auth.uid;
+    }
+
+    // Questions collection rules
+    match /questions/{questionId} {
+      // Allow reading if authenticated
+      allow read: if isAuthenticated();
+      
+      // Allow creating and updating question documents
+      allow create, update: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['stats'])
+        && isValidQuestionStats();
     }
   }
 } 

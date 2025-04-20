@@ -10,14 +10,40 @@ export interface Question {
   correctAnswerId: string;
 }
 
+export enum QuizView {
+  HOME = 'home',
+  NICKNAME_ENTRY = 'nickname',
+  QUESTION = 'question',
+  RESULTS = 'results'
+}
+
 export interface QuizCache {
   questions: Question[];
   lastGenerated: number;
 }
 
 export interface QuizState {
-  currentQuestionIndex: number;
+  view: QuizView;
+  quizId: string | null;
   questions: Question[];
-  userAnswers: string[];
+  currentQuestionIndex: number;
   score: number;
+  timeBasedScore: number;
+  currentPlayer: {
+    nickname: string;
+    score: number;
+    timeBasedScore: number;
+  } | null;
+  participants: Record<string, {
+    nickname: string;
+    score: number;
+    timeBasedScore: number;
+  }>;
+  isActive: boolean;
+  createdAt: Date;
+  totalParticipants: number;
+  userRank: {
+    position: number;
+    score: number;
+  } | null;
 } 

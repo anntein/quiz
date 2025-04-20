@@ -1,63 +1,40 @@
 import { NextResponse } from 'next/server';
+import questionsData from '@/data/questions.json';
 
-const questions = [
-  {
-    id: '1',
-    text: 'What is the capital of France?',
-    alternatives: [
-      { id: '1', text: 'London' },
-      { id: '2', text: 'Paris' },
-      { id: '3', text: 'Berlin' },
-      { id: '4', text: 'Madrid' }
-    ],
-    correctAnswerId: '2'
-  },
-  {
-    id: '2',
-    text: 'Which planet is known as the Red Planet?',
-    alternatives: [
-      { id: '1', text: 'Venus' },
-      { id: '2', text: 'Mars' },
-      { id: '3', text: 'Jupiter' },
-      { id: '4', text: 'Saturn' }
-    ],
-    correctAnswerId: '2'
-  },
-  {
-    id: '3',
-    text: 'What is the largest mammal in the world?',
-    alternatives: [
-      { id: '1', text: 'African Elephant' },
-      { id: '2', text: 'Blue Whale' },
-      { id: '3', text: 'Giraffe' },
-      { id: '4', text: 'Polar Bear' }
-    ],
-    correctAnswerId: '2'
-  },
-  {
-    id: '4',
-    text: 'Who painted the Mona Lisa?',
-    alternatives: [
-      { id: '1', text: 'Vincent van Gogh' },
-      { id: '2', text: 'Pablo Picasso' },
-      { id: '3', text: 'Leonardo da Vinci' },
-      { id: '4', text: 'Michelangelo' }
-    ],
-    correctAnswerId: '3'
-  },
-  {
-    id: '5',
-    text: 'What is the chemical symbol for gold?',
-    alternatives: [
-      { id: '1', text: 'Ag' },
-      { id: '2', text: 'Au' },
-      { id: '3', text: 'Fe' },
-      { id: '4', text: 'Cu' }
-    ],
-    correctAnswerId: '2'
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
-];
+  return newArray;
+}
 
 export async function GET() {
-  return NextResponse.json(questions);
+  // Get all questions and shuffle them
+  const allQuestions = questionsData.questions;
+  const selectedQuestions = shuffleArray(allQuestions).slice(0, 5);
+
+  // Shuffle alternatives for each question while preserving the correct answer ID
+  const shuffledQuestions = selectedQuestions.map(question => {
+    const correctAlternative = question.alternatives.find(alt => alt.id === question.correctAnswerId);
+    const otherAlternatives = question.alternatives.filter(alt => alt.id !== question.correctAnswerId);
+    const shuffledOtherAlternatives = shuffleArray(otherAlternatives);
+    
+    // Randomly insert the correct answer
+    const insertIndex = Math.floor(Math.random() * (shuffledOtherAlternatives.length + 1));
+    const shuffledAlternatives = [
+      ...shuffledOtherAlternatives.slice(0, insertIndex),
+      correctAlternative!,
+      ...shuffledOtherAlternatives.slice(insertIndex)
+    ];
+    
+    return {
+      ...question,
+      alternatives: shuffledAlternatives
+    };
+  });
+
+  return NextResponse.json(shuffledQuestions);
 } 

@@ -3,11 +3,18 @@ export interface Alternative {
   text: string;
 }
 
+export interface QuestionStats {
+  totalAttempts: number;
+  correctAttempts: number;
+  lastUpdated: number;
+}
+
 export interface Question {
   id: string;
   text: string;
   alternatives: Alternative[];
   correctAnswerId: string;
+  stats: QuestionStats;
 }
 
 export interface QuestionScore {

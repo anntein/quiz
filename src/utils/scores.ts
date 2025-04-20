@@ -1,6 +1,8 @@
 import { PlayerScore, QuestionScore } from '../types/quiz';
 
 const SCORES_KEY = 'quiz_high_scores';
+const ACCURACY_POINTS = 100;
+const TIME_BONUS_RATE = 10;
 
 export const getHighScores = (): PlayerScore[] => {
   if (typeof window === 'undefined') return [];
@@ -14,6 +16,12 @@ export const saveHighScore = (score: PlayerScore): void => {
   scores.push(score);
   scores.sort((a, b) => b.totalScore - a.totalScore);
   localStorage.setItem(SCORES_KEY, JSON.stringify(scores.slice(0, 10))); // Keep top 10 scores
+};
+
+export const calculateScore = (isCorrect: boolean, timeRemaining: number): number => {
+  const accuracyScore = isCorrect ? ACCURACY_POINTS : 0;
+  const timeBonus = Math.floor(timeRemaining * TIME_BONUS_RATE);
+  return accuracyScore + timeBonus;
 };
 
 export const calculateQuestionScore = (
